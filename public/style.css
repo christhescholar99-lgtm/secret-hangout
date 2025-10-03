@@ -2,9 +2,10 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: #f0f0f0;
   height: 100vh;
+  background: #f0f0f0;
   display: flex;
+  flex-direction: column;
 }
 
 /* Modal styles */
@@ -18,6 +19,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {
@@ -28,46 +30,48 @@ body {
   width: 90%;
 }
 
-/* Chat container */
+/* Chat container layout */
 #chat-container {
   display: flex;
+  flex-direction: column;
   height: 100vh;
-  overflow: hidden;
 }
 
 .user-list {
-  width: 220px;
+  height: 100px;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 10px;
   background: #222;
   color: white;
+}
+
+#vip-section {
+  background: #fffbe6;
   padding: 10px;
-  overflow-y: auto;
+  border-top: 1px solid #ccc;
+  display: none; /* hidden by default */
 }
 
 .chat-box {
   flex: 1;
   padding: 10px;
-  background: white;
   overflow-y: auto;
-  border-left: 1px solid #ccc;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.chat-box div {
-  margin-bottom: 10px;
+  background: white;
 }
 
 .chat-form {
   display: flex;
-  border-top: 1px solid #ccc;
   padding: 10px;
+  border-top: 1px solid #ccc;
+  background: #f9f9f9;
 }
 
 .chat-form input {
   flex: 1;
   padding: 10px;
   font-size: 1rem;
+  margin-right: 10px;
 }
 
 .chat-form button {

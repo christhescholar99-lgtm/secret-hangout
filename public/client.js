@@ -4,13 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Elements
   const userInfoModal = document.getElementById('user-info-modal');
   const userInfoForm = document.getElementById('user-info-form');
-
   const chatContainer = document.getElementById('chat-container');
   const chatBox = document.getElementById('chat-box');
   const form = document.getElementById('chat-form');
   const input = document.getElementById('msg');
   const userListDiv = document.getElementById('user-list');
-
+  const vipSection = document.getElementById('vip-section');
   const addVipBtn = document.getElementById('add-vip-btn');
   const vipMessage = document.getElementById('vip-message');
 
@@ -23,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - A));
   }
 
-  // User submits login form
+  // Login form submit
   userInfoForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const nickname = document.getElementById('nickname').value.trim();
@@ -39,15 +38,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     userInfo = { nickname, age, sex, country, location };
 
-    // Send user info to server
     socket.emit('join', userInfo);
 
-    // Hide login modal and show chat
     userInfoModal.style.display = 'none';
     chatContainer.style.display = 'flex';
+
+    // Only show VIP section if admin is logged in
+    if (nickname === 'admin') {
+      vipSection.style.display = 'block';
+    }
   });
 
-  // Receive messages from server
+  // Chat message received
   socket.on('message', (msg) => {
     const div = document.createElement('div');
     div.textContent = msg;
@@ -55,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatBox.scrollTop = chatBox.scrollHeight;
   });
 
-  // Receive updated user list
+  // Updated user list
   socket.on('userList', (users) => {
     userListDiv.innerHTML = '';
     users.forEach(user => {
@@ -67,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Send chat message
+  // Chat send
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const message = input.value.trim();
@@ -77,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Handle Add VIP button
+  // VIP button
   addVipBtn?.addEventListener('click', () => {
     const vipUsername = document.getElementById('vip-username').value.trim();
     const vipPassword = document.getElementById('vip-password').value;
@@ -99,4 +101,3 @@ document.addEventListener('DOMContentLoaded', () => {
     vipMessage.style.color = success ? 'green' : 'red';
   });
 });
-
