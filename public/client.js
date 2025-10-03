@@ -1,73 +1,102 @@
-const socket = io();
+document.addEventListener('DOMContentLoaded', () => {
+  const socket = io();
 
-// Elements
-const userInfoModal = document.getElementById('user-info-modal');
-const userInfoForm = document.getElementById('user-info-form');
+  // Elements
+  const userInfoModal = document.getElementById('user-info-modal');
+  const userInfoForm = document.getElementById('user-info-form');
 
-const chatContainer = document.getElementById('chat-container');
-const chatBox = document.getElementById('chat-box');
-const form = document.getElementById('chat-form');
-const input = document.getElementById('msg');
-const userListDiv = document.getElementById('user-list');
+  const chatContainer = document.getElementById('chat-container');
+  const chatBox = document.getElementById('chat-box');
+  const form = document.getElementById('chat-form');
+  const input = document.getElementById('msg');
+  const userListDiv = document.getElementById('user-list');
 
-let userInfo = null; // store user info
+  const addVipBtn = document.getElementById('add-vip-btn');
+  const vipMessage = document.getElementById('vip-message');
 
-// Convert country code to flag emoji
-function countryCodeToFlagEmoji(code) {
-  if (!code) return '';
-  const A = 65;
-  return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - A));
-}
+  let userInfo = null;
 
-// User submits login form
-userInfoForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const nickname = document.getElementById('nickname').value.trim();
-  const age = document.getElementById('age').value.trim();
-  const sex = document.getElementById('sex').value;
-  const country = document.getElementById('country').value.trim().toUpperCase();
-  const location = document.getElementById('location').value.trim();
-
-  if (!nickname || !age || !sex || !country || !location) {
-    alert('Please fill out all fields.');
-    return;
+  // Convert country code to flag emoji
+  function countryCodeToFlagEmoji(code) {
+    if (!code) return '';
+    const A = 65;
+    return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - A));
   }
 
-  userInfo = { nickname, age, sex, country, location };
+  // User submits login form
+  userInfoForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nickname = document.getElementById('nickname').value.trim();
+    const age = document.getElementById('age').value.trim();
+    const sex = document.getElementById('sex').value;
+    const country = document.getElementById('country').value.trim().toUpperCase();
+    const location = document.getElementById('location').value.trim();
 
-  // Send user info to server
-  socket.emit('join', userInfo);
+    if (!nickname || !age || !sex || !country || !location) {
+      alert('Please fill out all fields.');
+      return;
+    }
 
-  // Hide login modal and show chat
-  userInfoModal.style.display = 'none';
-  chatContainer.style.display = 'flex';
-});
+    userInfo = { nickname, age, sex, country, location };
 
-// Receive messages from server
-socket.on('message', (msg) => {
-  const div = document.createElement('div');
-  div.textContent = msg;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-});
+    // Send user info to server
+    socket.emit('join', userInfo);
 
-// Receive updated user list
-socket.on('userList', (users) => {
-  userListDiv.innerHTML = '';
-  users.forEach(user => {
-    const flag = countryCodeToFlagEmoji(user.country);
+    // Hide login modal and show chat
+    userInfoModal.style.display = 'none';
+    chatContainer.style.display = 'flex';
+  });
+
+  // Receive messages from server
+  socket.on('message', (msg) => {
     const div = document.createElement('div');
-    div.textContent = `${flag} ${user.nickname} (${user.age}, ${user.sex}) - ${user.location}`;
-    userListDiv.appendChild(div);
+    div.textContent = msg;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
+
+  // Receive updated user list
+  socket.on('userList', (users) => {
+    userListDiv.innerHTML = '';
+    users.forEach(user => {
+      const flag = countryCodeToFlagEmoji(user.country);
+      const isVIP = user.vip ? ' ⭐ VIP ⭐' : '';
+      const div = document.createElement('div');
+      div.innerHTML = `<strong>${flag} ${user.nickname}${isVIP}</strong> (${user.age}, ${user.sex}) - ${user.location}`;
+      userListDiv.appendChild(div);
+    });
+  });
+
+  // Send chat message
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const message = input.value.trim();
+    if (message && userInfo) {
+      socket.emit('chatMessage', message);
+      input.value = '';
+    }
+  });
+
+  // Handle Add VIP button
+  addVipBtn?.addEventListener('click', () => {
+    const vipUsername = document.getElementById('vip-username').value.trim();
+    const vipPassword = document.getElementById('vip-password').value;
+
+    if (!vipUsername || !vipPassword) {
+      vipMessage.textContent = 'Please enter username and admin password.';
+      return;
+    }
+
+    socket.emit('addVip', { username: vipUsername, password: vipPassword });
+
+    document.getElementById('vip-username').value = '';
+    document.getElementById('vip-password').value = '';
+    vipMessage.textContent = '';
+  });
+
+  socket.on('vipAddResult', ({ success, message }) => {
+    vipMessage.textContent = message;
+    vipMessage.style.color = success ? 'green' : 'red';
   });
 });
 
-// Send chat message
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const message = input.value.trim();
-  if (message && userInfo) {
-    socket.emit('chatMessage', message);
-    input.value = '';
-  }
-});

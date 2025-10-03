@@ -1,3 +1,10 @@
+<div id="vip-section" style="padding:10px; background:#fffae6; border:1px solid gold;">
+  <h3>VIP Management</h3>
+  <input type="text" id="vip-username" placeholder="Enter username to make VIP" />
+  <input type="password" id="vip-password" placeholder="Enter admin password" />
+  <button id="add-vip-btn">Add VIP</button>
+  <div id="vip-message" style="color: red; margin-top: 5px;"></div>
+</div>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,6 +49,16 @@
   <!-- Main Chat Area - initially hidden -->
   <div id="chat-container" style="display: none;">
     <div id="user-list" class="user-list"></div>
+
+    <!-- VIP Section -->
+    <div id="vip-section" style="padding:10px; background:#fffae6; border:1px solid gold; margin: 10px;">
+      <h3>VIP Management</h3>
+      <input type="text" id="vip-username" placeholder="Enter username to make VIP" />
+      <input type="password" id="vip-password" placeholder="Enter admin password" />
+      <button id="add-vip-btn">Add VIP</button>
+      <div id="vip-message" style="color: red; margin-top: 5px;"></div>
+    </div>
+
     <div id="chat-box" class="chat-box"></div>
 
     <form id="chat-form" class="chat-form">

@@ -4,42 +4,85 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const PORT = process.env.PORT || 3000;
 
+const ADMIN_PASSWORD = 'Pavarotti69';
+const vipUsers = new Set();
+
 app.use(express.static('public'));
 
-// Keep track of connected users
+// Track connected users
 let users = {};
 
 io.on('connection', (socket) => {
-  // Assign random guest name
-  const guestName = 'Guest' + Math.floor(Math.random() * 10000);
-  socket.username = guestName;
-  users[socket.id] = guestName;
+  console.log('A user connected:', socket.id);
 
-  // Send updated user list to all
-  io.emit('userList', Object.values(users));
+  // Handle user joining with info
+  socket.on('join', (userInfo) => {
+    const isVIP = vipUsers.has(userInfo.nickname);
+    users[socket.id] = {
+      ...userInfo,
+      vip: isVIP
+    };
+    socket.username = userInfo.nickname;
 
-  // Notify everyone that someone joined
-  socket.broadcast.emit('message', `${guestName} joined the chat`);
+    // Broadcast user joined
+    socket.broadcast.emit('message', `${userInfo.nickname} joined the chat`);
 
-  // Handle incoming chat message
+    // Update user list
+    updateUserList();
+  });
+
+  // Handle chat messages
   socket.on('chatMessage', (msg) => {
-    io.emit('message', `${socket.username}: ${msg}`);
+    const user = users[socket.id];
+    if (user) {
+      io.emit('message', `${user.nickname}: ${msg}`);
+    }
   });
 
-  // On disconnect
+  // Handle VIP add request
+  socket.on('addVip', ({ username, password }) => {
+    if (password === ADMIN_PASSWORD) {
+      vipUsers.add(username);
+
+      // Update existing users if they're now VIP
+      for (const id in users) {
+        if (users[id].nickname === username) {
+          users[id].vip = true;
+        }
+      }
+
+      socket.emit('vipAddResult', {
+        success: true,
+        message: `${username} added as VIP.`
+      });
+
+      updateUserList();
+    } else {
+      socket.emit('vipAddResult', {
+        success: false,
+        message: 'Incorrect admin password.'
+      });
+    }
+  });
+
+  // Handle disconnect
   socket.on('disconnect', () => {
-    // Announce user left
-    io.emit('message', `${socket.username} left the chat`);
-
-    // Remove from user list
-    delete users[socket.id];
-
-    // Update user list for everyone
-    io.emit('userList', Object.values(users));
+    const user = users[socket.id];
+    if (user) {
+      io.emit('message', `${user.nickname} left the chat`);
+      delete users[socket.id];
+      updateUserList();
+    }
   });
+
+  // Function to broadcast updated user list
+  function updateUserList() {
+    const userList = Object.values(users);
+    io.emit('userList', userList);
+  }
 });
 
-// Start the server
+// Start server
 http.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
