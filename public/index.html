@@ -1,28 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>Secret Hangout Chat</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="container">
-    <!-- Sidebar for online users -->
-    <div id="sidebar">
-      <h3>Online Users</h3>
-      <div id="user-list"></div>
-    </div>
-
-    <!-- Chat area -->
-    <div id="chat-area">
-      <div id="chat-box"></div>
-      <form id="chat-form">
-        <input type="text" id="msg" autocomplete="off" placeholder="Type a message..." />
-        <button>Send</button>
-      </form>
-    </div>
+  <!-- User Info Modal -->
+  <div id="user-info-modal" class="modal">
+    <form id="user-info-form" class="modal-content">
+      <h2>Login to Chat</h2>
+      <label>
+        Nickname:<br />
+        <input type="text" id="nickname" required />
+      </label><br /><br />
+      <label>
+        Age:<br />
+        <input type="number" id="age" min="1" max="120" required />
+      </label><br /><br />
+      <label>
+        Sex:<br />
+        <select id="sex" required>
+          <option value="">Select</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </label><br /><br />
+      <label>
+        Country (2-letter code, e.g. US, FR):<br />
+        <input type="text" id="country" maxlength="2" required />
+      </label><br /><br />
+      <label>
+        Location:<br />
+        <input type="text" id="location" required />
+      </label><br /><br />
+      <button type="submit">Join Chat</button>
+    </form>
   </div>
 
-  <!-- Scripts -->
+  <!-- Main Chat Area - initially hidden -->
+  <div id="chat-container" style="display: none;">
+    <div id="user-list" class="user-list"></div>
+    <div id="chat-box" class="chat-box"></div>
+
+    <form id="chat-form" class="chat-form">
+      <input id="msg" autocomplete="off" placeholder="Type your message..." />
+      <button>Send</button>
+    </form>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>
 </body>

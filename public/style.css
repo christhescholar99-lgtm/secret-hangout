@@ -9,48 +9,77 @@ body {
 #container {
   display: flex;
   flex: 1;
-  width: 100%;
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f0f0f0;
 }
 
-#sidebar {
-  width: 200px;
-  background-color: #f4f4f4;
-  border-right: 1px solid #ddd;
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 8px;
+  max-width: 320px;
+  width: 90%;
+}
+
+/* Chat container */
+#chat-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.user-list {
+  width: 220px;
+  background: #222;
+  color: white;
   padding: 10px;
-  box-sizing: border-box;
+  overflow-y: auto;
 }
 
-#chat-area {
+.chat-box {
   flex: 1;
+  padding: 10px;
+  background: white;
+  overflow-y: auto;
+  border-left: 1px solid #ccc;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
 }
 
-#chat-box {
-  flex: 1;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  overflow-y: scroll;
-  background-color: #fff;
+.chat-box div {
+  margin-bottom: 10px;
 }
 
-#chat-form {
+.chat-form {
   display: flex;
+  border-top: 1px solid #ccc;
   padding: 10px;
-  background-color: #f4f4f4;
 }
 
-#msg {
+.chat-form input {
   flex: 1;
   padding: 10px;
   font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
 }
 
-button {
-  padding: 10px;
+.chat-form button {
+  padding: 10px 20px;
   font-size: 1rem;
-  margin-left: 10px;
-  cursor: pointer;
 }
