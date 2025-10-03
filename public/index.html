@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Secret Hangout Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="container">
+    <!-- Sidebar for online users -->
+    <div id="sidebar">
+      <h3>Online Users</h3>
+      <div id="user-list"></div>
+    </div>
+
+    <!-- Chat area -->
+    <div id="chat-area">
+      <div id="chat-box"></div>
+      <form id="chat-form">
+        <input type="text" id="msg" autocomplete="off" placeholder="Type a message..." />
+        <button>Send</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>

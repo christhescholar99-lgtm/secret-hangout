@@ -2,25 +2,44 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+const PORT = process.env.PORT || 3000;
 
-// Serve index.html and static files
-app.use(express.static(__dirname));
+app.use(express.static('public'));
 
-// Handle socket connections
-io.on('connection', socket => {
-  console.log('A user connected');
+// Keep track of connected users
+let users = {};
 
-  socket.on('message', msg => {
-    io.emit('message', msg);
+io.on('connection', (socket) => {
+  // Assign random guest name
+  const guestName = 'Guest' + Math.floor(Math.random() * 10000);
+  socket.username = guestName;
+  users[socket.id] = guestName;
+
+  // Send updated user list to all
+  io.emit('userList', Object.values(users));
+
+  // Notify everyone that someone joined
+  socket.broadcast.emit('message', `${guestName} joined the chat`);
+
+  // Handle incoming chat message
+  socket.on('chatMessage', (msg) => {
+    io.emit('message', `${socket.username}: ${msg}`);
   });
 
+  // On disconnect
   socket.on('disconnect', () => {
-    console.log('A user disconnected');
+    // Announce user left
+    io.emit('message', `${socket.username} left the chat`);
+
+    // Remove from user list
+    delete users[socket.id];
+
+    // Update user list for everyone
+    io.emit('userList', Object.values(users));
   });
 });
 
-// Start server on port 3000
-const PORT = process.env.PORT || 3000;
+// Start the server
 http.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
