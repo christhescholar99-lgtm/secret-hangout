@@ -1,30 +1,23 @@
-const express = require('express');
-const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-const PORT = process.env.PORT || 3000;
-
-app.use(express.static('public'));
-
-const ADMIN_PASSWORD = 'Pavarotti69';
-const vipUsers = new Set();
-let users = {};
-
-function updateUserList() {
-  const userArray = Object.values(users);
-  userArray.sort((a, b) => {
-    const aVip = vipUsers.has(a.nickname);
-    const bVip = vipUsers.has(b.nickname);
-    return bVip - aVip; // VIPs first
-  });
-  io.emit('userList', userArray);
-}
-
 io.on('connection', (socket) => {
   socket.on('join', (userInfo) => {
+    // Basic validation: check if nickname exists and is not already taken
+    if (!userInfo.nickname) {
+      socket.emit('joinFail');
+      return;
+    }
+
+    // Check if nickname already used by another connected user
+    const nicknameTaken = Object.values(users).some(u => u.nickname === userInfo.nickname);
+    if (nicknameTaken) {
+      socket.emit('joinFail');
+      return;
+    }
+
     userInfo.vip = vipUsers.has(userInfo.nickname);
     users[socket.id] = userInfo;
     socket.username = userInfo.nickname;
+
+    socket.emit('joinSuccess');  // Notify client that join was successful
     socket.broadcast.emit('message', `${userInfo.nickname} joined the chat`);
     updateUserList();
   });
@@ -54,8 +47,4 @@ io.on('connection', (socket) => {
       socket.emit('vipAddResult', { success: false, message: 'Incorrect admin password.' });
     }
   });
-});
-
-http.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
